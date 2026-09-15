@@ -1,16 +1,41 @@
 {% extends 'feria/base.html' %}
 
-{% block title %}Boletos Digitales Solicitud #{{ solicitud.id }} — Feria de Seguridad{% endblock %}
+{% block title %}Boletos Digitales — Feria de Seguridad 2026{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ticket-card-physical {
+        background: #fffbeb;
+        border: 2px solid #78350f;
+        border-radius: 18px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(120, 53, 15, 0.12);
+    }
+    .ticket-header-title {
+        color: #4a2711;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+    }
+    .ticket-slogan {
+        color: #78350f;
+        font-style: italic;
+    }
+    .ticket-border-dashed {
+        border-top: 2px dashed #d97706;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 800px;">
+<div class="container py-2" style="max-width: 850px;">
 
-    <!-- CABECERA -->
-    <div class="card card-custom p-4 bg-white mb-4">
+    <!-- CABECERA SOLICITUD -->
+    <div class="card card-custom p-4 bg-white mb-4 shadow-sm border-0">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <span class="badge bg-secondary mb-1">SOLICITUD #{{ solicitud.id }}</span>
-                <h3 class="fw-bold mb-0">{{ solicitud.nombre_comprador }}</h3>
+                <span class="badge bg-warning text-dark mb-1 fw-bold">SOLICITUD DE BOLETOS #{{ solicitud.id }}</span>
+                <h3 class="fw-extrabold mb-0 text-dark">{{ solicitud.nombre_comprador }}</h3>
                 <small class="text-muted"><i class="bi bi-card-text me-1"></i>C.I.: {{ solicitud.cedula }} | <i class="bi bi-whatsapp text-success me-1"></i>{{ solicitud.telefono }}</small>
             </div>
             <div>
@@ -24,7 +49,7 @@
                     </span>
                 {% else %}
                     <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
-                        <i class="bi bi-x-circle-fill me-1"></i> SOLICITUD RECHAZADA
+                        <i class="bi bi-x-circle-fill me-1"></i> RECHAZADO
                     </span>
                 {% endif %}
             </div>
@@ -33,67 +58,73 @@
 
     <!-- SI LA SOLICITUD ESTÁ EN REVISIÓN -->
     {% if solicitud.estado == 'pendiente' %}
-        <div class="card card-custom p-4 text-center bg-white">
+        <div class="card card-custom p-4 text-center bg-white border-0 shadow-sm">
             <i class="bi bi-clock-history text-warning display-4 mb-3"></i>
-            <h4 class="fw-bold text-dark">Tu pago está siendo verificado por el comité</h4>
-            <p class="text-muted mb-0">Una vez aprobado tu comprobante, en esta misma página aparecerán tus {{ solicitud.cantidad }} boleto(s) digital(es) con su código QR para el ingreso.</p>
+            <h4 class="fw-bold text-dark">Tu comprobante está siendo verificado</h4>
+            <p class="text-muted mb-0">Una vez aprobado por el comité, en esta misma pantalla aparecerán tus <strong>{{ solicitud.cantidad }} boleto(s) digital(es)</strong> con código QR para canjear tu menestra con chuleta en la feria.</p>
         </div>
 
     <!-- SI FUE RECHAZADA -->
     {% elif solicitud.estado == 'rechazado' %}
-        <div class="card card-custom p-4 bg-white border-start border-danger border-4">
+        <div class="card card-custom p-4 bg-white border-start border-danger border-4 shadow-sm">
             <h4 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Solicitud No Aprobada</h4>
-            <p class="text-secondary mb-2">Motivo / Observaciones del Administrador:</p>
+            <p class="text-secondary mb-2">Motivo / Observaciones:</p>
             <div class="p-3 bg-light rounded-3 text-dark fw-semibold mb-3">
-                {{ solicitud.notas_admin|default:"Comprobante ilegible o pago no recibido." }}
+                {{ solicitud.notas_admin|default:"Comprobante ilegible o transferencia no encontrada." }}
             </div>
-            <p class="text-muted small mb-0">Si consideras que fue un error, por favor contacta al comité organizador.</p>
         </div>
 
-    <!-- SI FUE APROBADA -> MOSTRAR BOLETOS DIGITALES CON QR -->
+    <!-- SI FUE APROBADA -> DIBUJAR DIGITAL TWIN DEL BOLETO FÍSICO -->
     {% elif solicitud.estado == 'confirmado' %}
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0"><i class="bi bi-qr-code text-primary me-2"></i>Tus Boletos Digitales ({{ boletos.count }})</h4>
-            <button onclick="window.print()" class="btn btn-outline-dark btn-sm font-weight-bold d-print-none">
+            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-qr-code text-warning me-2" style="color: #d97706;"></i>Tus Boletos Digitales ({{ boletos.count }})</h4>
+            <button onclick="window.print()" class="btn btn-outline-dark btn-sm fw-bold d-print-none">
                 <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
             </button>
         </div>
 
         <div class="row g-4">
             {% for b in boletos %}
-                <div class="col-md-6">
-                    <div class="card card-custom bg-white p-4 border border-2 border-primary position-relative overflow-hidden">
-                        <!-- HEADER BOLETO -->
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                            <div>
-                                <span class="badge bg-primary px-2 py-1">FERIA DE SEGURIDAD 2026</span>
-                            </div>
-                            <span class="badge {% if b.estado == 'confirmado' %}bg-success{% elif b.estado == 'utilizado' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill">
-                                {{ b.get_estado_display }}
-                            </span>
-                        </div>
-
-                        <!-- CÓDIGO Y COMPRADOR -->
-                        <div class="text-center my-2">
-                            <h3 class="fw-extrabold text-primary letter-spacing-1 mb-1">{{ b.codigo_unico }}</h3>
-                            <p class="fw-semibold text-dark mb-2">{{ b.nombre_comprador }}</p>
-
-                            <!-- QR IMAGE -->
-                            {% if b.qr_code %}
-                                <div class="bg-light p-3 d-inline-block rounded-3 shadow-sm border mb-2">
-                                    <img src="{{ b.qr_code.url }}" alt="QR Code {{ b.codigo_unico }}" class="img-fluid" style="max-width: 180px;">
+                <div class="col-md-12">
+                    <div class="ticket-card-physical p-4">
+                        <div class="row align-items-center">
+                            <!-- IZQUIERDA: DISEÑO DEL BOLETO FÍSICO -->
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h2 class="ticket-header-title display-6 mb-0">SAN LUIS</h2>
+                                    <span class="badge bg-warning text-dark fw-bold">NÚMERO ÚNICO: {{ b.codigo_unico }}</span>
                                 </div>
-                            {% endif %}
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Muestra este código QR en la puerta de ingreso al evento</small>
-                        </div>
+                                <h5 class="fw-bold text-danger mb-2" style="color: #92400e !important;">¡VEN A NUESTRA FERIA DE SEGURIDAD!</h5>
+                                <p class="text-dark small mb-2">
+                                    Comparte con tus vecinos y disfruta de una deliciosa <strong>menestra con chuleta</strong>.
+                                </p>
+                                <div class="h4 fw-extrabold text-dark mb-1">
+                                    Menestra con chuleta: <span class="text-danger" style="color: #b45309 !important;">$3,00</span>
+                                </div>
+                                <div class="ticket-slogan small mb-3">"Juntos hacemos comunidad."</div>
 
-                        <!-- FOOTER BOLETO -->
-                        <div class="bg-light p-2 rounded-3 mt-3 text-center small text-muted">
-                            {% if b.estado == 'utilizado' %}
-                                <span class="text-warning fw-bold"><i class="bi bi-check2-circle"></i> Usado el {{ b.fecha_uso|date:"d/m/Y H:i" }}</span>
-                            {% else %}
-                                <span><i class="bi bi-shield-check text-success"></i> Boleto Oficial Confirmado</span>
-                            {% endif %}
+                                <div class="ticket-border-dashed pt-2 small text-muted">
+                                    <strong>Organizan:</strong> Comité de Seguridad · Asamblea Barrial · Comité Pro-Mejoras
+                                </div>
+                            </div>
+
+                            <!-- DERECHA: CÓDIGO QR Y ESTADO -->
+                            <div class="col-md-4 text-center border-start border-warning border-opacity-25 pt-3 pt-md-0">
+                                {% if b.qr_code %}
+                                    <div class="bg-white p-2 d-inline-block rounded-3 shadow-sm border mb-2">
+                                        <img src="{{ b.qr_code.url }}" alt="QR Code {{ b.codigo_unico }}" class="img-fluid" style="max-width: 150px;">
+                                    </div>
+                                {% endif %}
+                                <div class="mt-1">
+                                    {% if b.estado == 'confirmado' %}
+                                        <span class="badge bg-success px-3 py-1 rounded-pill">✅ BOLETO VÁLIDO</span>
+                                    {% elif b.estado == 'utilizado' %}
+                                        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill">⚠️ UTILIZADO el {{ b.fecha_uso|date:"d/m/Y H:i" }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger px-3 py-1 rounded-pill">CANCELADO</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
