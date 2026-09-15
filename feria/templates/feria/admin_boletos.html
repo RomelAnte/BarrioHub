@@ -1,0 +1,214 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Panel de Administración de Boletos — Feria de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-person-badge-fill text-warning me-2"></i>Administración de Boletos</h2>
+            <p class="text-muted mb-0">Revisión manual de comprobantes de pago y generación de boletos digitales.</p>
+        </div>
+        <div>
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">
+                <i class="bi bi-hourglass-split me-1"></i> {{ pendientes_count }} Solicitud(es) Pendientes
+            </span>
+        </div>
+    </div>
+
+    <!-- BUSCADOR Y FILTRO -->
+    <div class="card card-custom p-3 mb-4 bg-white">
+        <form method="GET" action="{% url 'admin_boletos' %}" class="row g-2 align-items-center">
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Buscar por comprador, cédula o teléfono...">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="estado" class="form-select bg-light">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="pendiente" {% if estado_filter == 'pendiente' %}selected{% endif %}>En Revisión (Pendientes)</option>
+                    <option value="confirmado" {% if estado_filter == 'confirmado' %}selected{% endif %}>Aprobados / Confirmados</option>
+                    <option value="rechazado" {% if estado_filter == 'rechazado' %}selected{% endif %}>Rechazados</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-warning text-dark w-100 fw-bold"><i class="bi bi-funnel-fill"></i></button>
+                {% if query or estado_filter %}
+                    <a href="{% url 'admin_boletos' %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle-fill"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE SOLICITUDES DE COMPROBANTE -->
+    <div class="card card-custom bg-white overflow-hidden mb-5">
+        <div class="card-header bg-light py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-card-checklist me-2"></i>Solicitudes de Preventa Digital</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4"># ID</th>
+                        <th>Comprador / Cédula</th>
+                        <th>Contacto</th>
+                        <th>Boletos / Total</th>
+                        <th>Comprobante</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sol in solicitudes %}
+                        <tr class="{% if sol.estado == 'pendiente' %}table-warning table-opacity-25{% endif %}">
+                            <td class="ps-4 fw-bold">#{{ sol.id }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ sol.nombre_comprador }}</div>
+                                <small class="text-muted">C.I.: {{ sol.cedula }}</small>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-whatsapp text-success me-1"></i>{{ sol.telefono }}</div>
+                                {% if sol.email %}<small class="text-muted">{{ sol.email }}</small>{% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold text-primary">{{ sol.cantidad }} boleto(s)</div>
+                                <span class="badge bg-light text-dark border">${{ sol.total }} USD</span>
+                            </td>
+                            <td>
+                                {% if sol.comprobante %}
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalComprobante{{ sol.pk }}">
+                                        <i class="bi bi-image me-1"></i> Ver Foto
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted small">Sin archivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sol.estado == 'pendiente' %}
+                                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill">En Revisión</span>
+                                {% elif sol.estado == 'confirmado' %}
+                                    <span class="badge bg-success px-3 py-1 rounded-pill">Aprobado</span>
+                                {% else %}
+                                    <span class="badge bg-danger px-3 py-1 rounded-pill">Rechazado</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{% url 'solicitud_detalle_publico' sol.pk %}" class="btn btn-sm btn-outline-info" title="Ver detalle / Boletos">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+
+                                    {% if sol.estado == 'pendiente' or sol.estado == 'rechazado' %}
+                                        <button class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#modalAprobar{{ sol.pk }}">
+                                            <i class="bi bi-check-lg me-1"></i> Aprobar
+                                        </button>
+                                    {% endif %}
+
+                                    {% if sol.estado == 'pendiente' %}
+                                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalRechazar{{ sol.pk }}">
+                                            <i class="bi bi-x-lg me-1"></i> Rechazar
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- MODAL COMPROBANTE -->
+                        {% if sol.comprobante %}
+                            <div class="modal fade" id="modalComprobante{{ sol.pk }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-bold"><i class="bi bi-image me-2"></i>Comprobante Solicitud #{{ sol.id }} - {{ sol.nombre_comprador }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center bg-dark p-3">
+                                            <img src="{{ sol.comprobante.url }}" alt="Comprobante {{ sol.id }}" class="img-fluid rounded" style="max-height: 70vh;">
+                                        </div>
+                                        <div class="modal-footer justify-content-between">
+                                            <span class="fw-bold text-primary">Monto Depositado: ${{ sol.total }} USD</span>
+                                            <a href="{{ sol.comprobante.url }}" target="_blank" class="btn btn-outline-primary btn-sm">Abrir Imagen Completa</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- MODAL APROBAR -->
+                        <div class="modal fade" id="modalAprobar{{ sol.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold text-success"><i class="bi bi-check-circle-fill me-2"></i>Aprobar Solicitud #{{ sol.id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'aprobar_solicitud' sol.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body text-start">
+                                            <p>¿Confirmar la aprobación del pago de <strong>{{ sol.nombre_comprador }}</strong>?</p>
+                                            <div class="p-3 bg-light rounded-3 mb-3">
+                                                <small class="text-muted d-block">Acción automática:</small>
+                                                <strong class="text-success"><i class="bi bi-qr-code-scan me-1"></i>Se generarán {{ sol.cantidad }} boleto(s) digital(es) con código QR único.</strong>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Notas para el comprador (opcional)</label>
+                                                <input type="text" name="notas_admin" class="form-control" placeholder="Ej. Pago verificado correctamente.">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-success fw-bold">Sí, Aprobar y Generar Boletos QR</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MODAL RECHAZAR -->
+                        <div class="modal fade" id="modalRechazar{{ sol.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle-fill me-2"></i>Rechazar Solicitud #{{ sol.id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'rechazar_solicitud' sol.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body text-start">
+                                            <p>Indica la razón por la que se rechaza la solicitud de <strong>{{ sol.nombre_comprador }}</strong>:</p>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Motivo del rechazo <span class="text-danger">*</span></label>
+                                                <textarea name="notas_admin" class="form-control" rows="3" required placeholder="Ej. Comprobante no coincide con el valor o no es legible."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-danger fw-bold">Confirmar Rechazo</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox display-6 d-block mb-2 text-muted"></i>
+                                No hay solicitudes de preventa registradas con los criterios seleccionados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Preventa Boletos Digitales — Feria de Seguridad 2026{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+
+    <!-- CABECERA -->
+    <div class="text-center max-w-700 mx-auto mb-4" style="max-width: 650px;">
+        <span class="badge bg-primary text-white mb-2 px-3 py-2 rounded-pill fw-bold">PREVENTA DIGITAL</span>
+        <h2 class="fw-bold mb-2">Adquiere tus Boletos Digitales</h2>
+        <p class="text-muted">Realiza tu pago por transferencia bancaria, sube el comprobante y recibe tus boletos con código QR directamente en tu celular.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- COLUMNA IZQUIERDA: DATOS BANCARIOS E INSTRUCCIONES -->
+        <div class="col-lg-5">
+            <div class="card card-custom p-4 bg-white border-top border-4 border-primary h-100">
+                <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-bank text-primary me-2"></i>Instrucciones de Pago</h4>
+                <p class="text-secondary small">Realiza una transferencia o depósito por el valor total a la siguiente cuenta oficial:</p>
+
+                <div class="bg-light p-3 rounded-3 mb-3 border">
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted small">Banco:</span>
+                        <strong class="text-dark">{{ datos_banco.banco }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted small">Tipo de Cuenta:</span>
+                        <strong class="text-dark">{{ datos_banco.tipo_cuenta }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted small">Número de Cuenta:</span>
+                        <strong class="text-primary fs-5 fw-bold">{{ datos_banco.numero_cuenta }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted small">Titular:</span>
+                        <strong class="text-dark">{{ datos_banco.titular }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted small">CI / RUC:</span>
+                        <strong class="text-dark">{{ datos_banco.identificacion }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Correo Notificación:</span>
+                        <strong class="text-dark">{{ datos_banco.email }}</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-0 rounded-3">
+                    <i class="bi bi-info-circle-fill me-1"></i> <strong>Precio por boleto:</strong> ${{ datos_banco.precio_unitario|floatformat:2 }} USD.
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: FORMULARIO DE SOLICITUD Y COMPROBANTE -->
+        <div class="col-lg-7">
+            <div class="card card-custom p-4 p-md-5 bg-white">
+                <h4 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Formulario de Registro</h4>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Nombre Completo <span class="text-danger">*</span></label>
+                            {{ form.nombre_comprador }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Cédula / Identificación <span class="text-danger">*</span></label>
+                            {{ form.cedula }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teléfono / WhatsApp <span class="text-danger">*</span></label>
+                            {{ form.telefono }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Correo Electrónico (opcional)</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Cantidad de Boletos <span class="text-danger">*</span></label>
+                            {{ form.cantidad }}
+                        </div>
+
+                        <!-- CÁLCULO DE TOTAL DINÁMICO -->
+                        <div class="col-12">
+                            <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded-3 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-primary">Valor Total a Transferir:</span>
+                                <span class="h3 fw-bold text-primary mb-0" id="total_display">$2.00</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Subir Comprobante de Pago (Imagen/Foto) <span class="text-danger">*</span></label>
+                            {{ form.comprobante }}
+                            <small class="text-muted d-block mt-1">Sube la captura o foto legible de tu transferencia.</small>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-brand btn-lg w-100 fw-bold">
+                            <i class="bi bi-send-fill me-1"></i> Enviar Solicitud y Comprobante
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputCantidad = document.getElementById('id_cantidad');
+        const displayTotal = document.getElementById('total_display');
+        const precioUnitario = 2.00;
+
+        function calcularTotal() {
+            let cantidad = parseInt(inputCantidad.value) || 1;
+            if (cantidad < 1) cantidad = 1;
+            const total = cantidad * precioUnitario;
+            displayTotal.textContent = '$' + total.toFixed(2);
+        }
+
+        if (inputCantidad) {
+            inputCantidad.addEventListener('input', calcularTotal);
+            inputCantidad.addEventListener('change', calcularTotal);
+        }
+    });
+</script>
+{% endblock %}

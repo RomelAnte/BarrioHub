@@ -1,0 +1,222 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Boletos Físicos — Feria de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- HEADER Y ACCIONES -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-ticket-perforated-fill text-success me-2"></i>Boletos Físicos</h2>
+            <p class="text-muted mb-0">Control de inventario y ventas de boletos físicos asignados a nuestro barrio.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success fw-semibold" data-bs-toggle="modal" data-bs-target="#modalLote">
+                <i class="bi bi-layers-fill me-1"></i> Generar Lote
+            </button>
+            <a href="{% url 'boleto_fisico_create' %}" class="btn btn-success fw-semibold">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Boleto Físico
+            </a>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card card-custom p-3 bg-white border-start border-success border-4 d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold">BOLETOS DISPONIBLES</span>
+                    <h3 class="fw-bold text-success mb-0">{{ total_disponibles }}</h3>
+                </div>
+                <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle">
+                    <i class="bi bi-check-circle-fill fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-custom p-3 bg-white border-start border-primary border-4 d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold">BOLETOS VENDIDOS</span>
+                    <h3 class="fw-bold text-primary mb-0">{{ total_vendidos }}</h3>
+                </div>
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
+                    <i class="bi bi-cart-check-fill fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BUSCADOR Y FILTROS -->
+    <div class="card card-custom p-3 mb-4 bg-white">
+        <form method="GET" action="{% url 'boletos_fisicos_list' %}" class="row g-2 align-items-center">
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Buscar por número de boleto, comprador o teléfono...">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="estado" class="form-select bg-light">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="disponible" {% if estado_filter == 'disponible' %}selected{% endif %}>Disponible</option>
+                    <option value="vendido" {% if estado_filter == 'vendido' %}selected{% endif %}>Vendido</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-success w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
+                {% if query or estado_filter %}
+                    <a href="{% url 'boletos_fisicos_list' %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle-fill"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE BOLETOS FÍSICOS -->
+    <div class="card card-custom bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Número / ID</th>
+                        <th>Estado</th>
+                        <th>Comprador</th>
+                        <th>Teléfono</th>
+                        <th>Fecha de Venta</th>
+                        <th class="text-end pe-4">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for boleto in boletos %}
+                        <tr>
+                            <td class="ps-4 fw-bold">
+                                <i class="bi bi-ticket-perforated me-2 text-secondary"></i>#{{ boleto.numero }}
+                            </td>
+                            <td>
+                                {% if boleto.estado == 'disponible' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1 rounded-pill">Disponible</span>
+                                {% else %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-1 rounded-pill">Vendido</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if boleto.comprador %}
+                                    <span class="fw-semibold">{{ boleto.comprador }}</span>
+                                {% else %}
+                                    <span class="text-muted small">--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if boleto.telefono %}
+                                    <small><i class="bi bi-whatsapp text-success me-1"></i>{{ boleto.telefono }}</small>
+                                {% else %}
+                                    <span class="text-muted small">--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if boleto.fecha_venta %}
+                                    <small class="text-muted">{{ boleto.fecha_venta|date:"d/m/Y H:i" }}</small>
+                                {% else %}
+                                    <span class="text-muted small">--</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if boleto.estado == 'disponible' %}
+                                    <button class="btn btn-sm btn-outline-success fw-semibold" data-bs-toggle="modal" data-bs-target="#modalVender{{ boleto.pk }}">
+                                        <i class="bi bi-cart-plus me-1"></i> Registrar Venta
+                                    </button>
+                                {% else %}
+                                    <form method="POST" action="{% url 'boleto_fisico_marcar_disponible' boleto.pk %}" class="d-inline" onsubmit="return confirm('¿Revertir venta y volver a disponible?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Revertir
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- MODAL REGISTRAR VENTA -->
+                        <div class="modal fade" id="modalVender{{ boleto.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold"><i class="bi bi-cart-check text-success me-2"></i>Registrar Venta Boleto #{{ boleto.numero }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'boleto_fisico_marcar_vendido' boleto.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body text-start">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Nombre del Comprador (Opcional)</label>
+                                                <input type="text" name="comprador" class="form-control" placeholder="Ej. Juan Pérez">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Teléfono de Contacto (Opcional)</label>
+                                                <input type="text" name="telefono" class="form-control" placeholder="Ej. 0991234567">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-success fw-semibold">Confirmar Venta</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-ticket-perforated display-6 d-block mb-2 text-muted"></i>
+                                No hay boletos físicos registrados en esta vista.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL GENERAR LOTE -->
+<div class="modal fade" id="modalLote" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-layers-fill text-success me-2"></i>Generar Lote de Boletos Físicos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'boleto_fisico_create' %}">
+                {% csrf_token %}
+                <input type="hidden" name="crear_lote" value="1">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Prefijo de Boleto</label>
+                        <input type="text" name="prefijo" value="F-" class="form-control" placeholder="Ej. F-">
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Número Inicio</label>
+                            <input type="number" name="inicio" value="1" class="form-control" min="1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Número Fin</label>
+                            <input type="number" name="fin" value="50" class="form-control" min="1">
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Ejemplo: F-001 hasta F-050.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-semibold">Generar Boletos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

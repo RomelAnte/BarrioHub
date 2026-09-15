@@ -1,0 +1,105 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Boletos Digitales Solicitud #{{ solicitud.id }} — Feria de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+
+    <!-- CABECERA -->
+    <div class="card card-custom p-4 bg-white mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-secondary mb-1">SOLICITUD #{{ solicitud.id }}</span>
+                <h3 class="fw-bold mb-0">{{ solicitud.nombre_comprador }}</h3>
+                <small class="text-muted"><i class="bi bi-card-text me-1"></i>C.I.: {{ solicitud.cedula }} | <i class="bi bi-whatsapp text-success me-1"></i>{{ solicitud.telefono }}</small>
+            </div>
+            <div>
+                {% if solicitud.estado == 'pendiente' %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">
+                        <i class="bi bi-hourglass-split me-1"></i> EN REVISIÓN MANUAL
+                    </span>
+                {% elif solicitud.estado == 'confirmado' %}
+                    <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">
+                        <i class="bi bi-check-circle-fill me-1"></i> APROBADO / BOLETOS LISTOS
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
+                        <i class="bi bi-x-circle-fill me-1"></i> SOLICITUD RECHAZADA
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SI LA SOLICITUD ESTÁ EN REVISIÓN -->
+    {% if solicitud.estado == 'pendiente' %}
+        <div class="card card-custom p-4 text-center bg-white">
+            <i class="bi bi-clock-history text-warning display-4 mb-3"></i>
+            <h4 class="fw-bold text-dark">Tu pago está siendo verificado por el comité</h4>
+            <p class="text-muted mb-0">Una vez aprobado tu comprobante, en esta misma página aparecerán tus {{ solicitud.cantidad }} boleto(s) digital(es) con su código QR para el ingreso.</p>
+        </div>
+
+    <!-- SI FUE RECHAZADA -->
+    {% elif solicitud.estado == 'rechazado' %}
+        <div class="card card-custom p-4 bg-white border-start border-danger border-4">
+            <h4 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-octagon-fill me-2"></i>Solicitud No Aprobada</h4>
+            <p class="text-secondary mb-2">Motivo / Observaciones del Administrador:</p>
+            <div class="p-3 bg-light rounded-3 text-dark fw-semibold mb-3">
+                {{ solicitud.notas_admin|default:"Comprobante ilegible o pago no recibido." }}
+            </div>
+            <p class="text-muted small mb-0">Si consideras que fue un error, por favor contacta al comité organizador.</p>
+        </div>
+
+    <!-- SI FUE APROBADA -> MOSTRAR BOLETOS DIGITALES CON QR -->
+    {% elif solicitud.estado == 'confirmado' %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0"><i class="bi bi-qr-code text-primary me-2"></i>Tus Boletos Digitales ({{ boletos.count }})</h4>
+            <button onclick="window.print()" class="btn btn-outline-dark btn-sm font-weight-bold d-print-none">
+                <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+            </button>
+        </div>
+
+        <div class="row g-4">
+            {% for b in boletos %}
+                <div class="col-md-6">
+                    <div class="card card-custom bg-white p-4 border border-2 border-primary position-relative overflow-hidden">
+                        <!-- HEADER BOLETO -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <span class="badge bg-primary px-2 py-1">FERIA DE SEGURIDAD 2026</span>
+                            </div>
+                            <span class="badge {% if b.estado == 'confirmado' %}bg-success{% elif b.estado == 'utilizado' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill">
+                                {{ b.get_estado_display }}
+                            </span>
+                        </div>
+
+                        <!-- CÓDIGO Y COMPRADOR -->
+                        <div class="text-center my-2">
+                            <h3 class="fw-extrabold text-primary letter-spacing-1 mb-1">{{ b.codigo_unico }}</h3>
+                            <p class="fw-semibold text-dark mb-2">{{ b.nombre_comprador }}</p>
+
+                            <!-- QR IMAGE -->
+                            {% if b.qr_code %}
+                                <div class="bg-light p-3 d-inline-block rounded-3 shadow-sm border mb-2">
+                                    <img src="{{ b.qr_code.url }}" alt="QR Code {{ b.codigo_unico }}" class="img-fluid" style="max-width: 180px;">
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Muestra este código QR en la puerta de ingreso al evento</small>
+                        </div>
+
+                        <!-- FOOTER BOLETO -->
+                        <div class="bg-light p-2 rounded-3 mt-3 text-center small text-muted">
+                            {% if b.estado == 'utilizado' %}
+                                <span class="text-warning fw-bold"><i class="bi bi-check2-circle"></i> Usado el {{ b.fecha_uso|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <span><i class="bi bi-shield-check text-success"></i> Boleto Oficial Confirmado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

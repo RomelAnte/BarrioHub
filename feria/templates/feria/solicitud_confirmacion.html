@@ -1,0 +1,46 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Solicitud Registrada — Feria de Seguridad 2026{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 650px;">
+    <div class="card card-custom bg-white p-4 p-md-5 text-center">
+        <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle d-inline-block mx-auto mb-3" style="width: 80px; height: 80px; padding: 18px 0;">
+            <i class="bi bi-check-circle-fill display-5"></i>
+        </div>
+
+        <h2 class="fw-bold mb-2">¡Solicitud Registrada con Éxito!</h2>
+        <p class="text-secondary lead fs-6 mb-4">
+            Gracias <strong>{{ solicitud.nombre_comprador }}</strong>. Hemos recibido tu comprobante para <strong>{{ solicitud.cantidad }} boleto(s)</strong> (Total: ${{ solicitud.total }} USD).
+        </p>
+
+        <div class="bg-light p-3 rounded-3 text-start mb-4 border">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">Número de Solicitud:</span>
+                <strong class="text-dark">#{{ solicitud.id }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">Estado Actual:</span>
+                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill">En Revisión por el Comité</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="text-muted small">Fecha de Registro:</span>
+                <span class="text-dark small">{{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}</span>
+            </div>
+        </div>
+
+        <div class="alert alert-info py-2 small text-start mb-4">
+            <i class="bi bi-clock-history me-1"></i> El comité verificará tu transferencia a la brevedad. Guarda tu enlace de consulta para revisar la aprobación y obtener tus boletos con QR.
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <a href="{% url 'solicitud_detalle_publico' solicitud.pk %}" class="btn btn-brand fw-bold px-4 py-2">
+                <i class="bi bi-ticket-detailed me-1"></i> Ver Estado y Boletos QR
+            </a>
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary fw-semibold px-4 py-2">
+                Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

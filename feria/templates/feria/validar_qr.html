@@ -1,0 +1,186 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Validación de Boletos QR — Feria de Seguridad 2026{% endblock %}
+
+{% block extra_head %}
+<!-- HTML5 QR Code Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<style>
+    #reader {
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px dashed #0284c7;
+    }
+    .status-card-valid {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .status-card-used {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    .status-card-invalid {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+
+    <div class="text-center mb-4">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">CONTROL DE ACCESO Y PUERTA</span>
+        <h2 class="fw-bold mb-1"><i class="bi bi-qr-code-scan me-2"></i>Validación de Boleto QR</h2>
+        <p class="text-muted">Escanea con la cámara de tu celular o digita el código del boleto para verificar su validez.</p>
+    </div>
+
+    <!-- FORMULARIO INGRESO CÓDIGO O ESCÁNER -->
+    <div class="card card-custom p-4 bg-white mb-4">
+        <!-- PESTAÑAS ESCANEAR VS MANUAL -->
+        <ul class="nav nav-pills nav-justified mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="pills-manual-tab" data-bs-toggle="pill" data-bs-target="#pills-manual" type="button" role="tab">
+                    <i class="bi bi-keyboard me-1"></i> Ingreso Manual
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="pills-camera-tab" data-bs-toggle="pill" data-bs-target="#pills-camera" type="button" role="tab" onclick="startScanner()">
+                    <i class="bi bi-camera-fill me-1"></i> Usar Cámara QR
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="pills-tabContent">
+            <!-- TAB MANUAL -->
+            <div class="tab-pane fade show active" id="pills-manual" role="tabpanel">
+                <form method="GET" action="{% url 'validar_qr' %}" class="d-flex gap-2">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light"><i class="bi bi-qr-code text-muted"></i></span>
+                        <input type="text" name="codigo" value="{{ codigo }}" class="form-control text-uppercase fw-bold" placeholder="Ej. FERIA-2026-000001" autofocus required>
+                    </div>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold px-4">
+                        Validar
+                    </button>
+                </form>
+            </div>
+
+            <!-- TAB CÁMARA QR -->
+            <div class="tab-pane fade text-center" id="pills-camera" role="tabpanel">
+                <div id="reader" class="bg-light p-2 mb-2"></div>
+                <small class="text-muted">Apunta la cámara del celular al código QR del boleto.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESULTADO DE VALIDACIÓN -->
+    {% if codigo %}
+        {% if resultado == 'VALIDO' %}
+            <!-- ✅ BOLETO VÁLIDO -->
+            <div class="card card-custom status-card-valid p-4 p-md-5 text-center shadow-lg mb-4">
+                <div class="mb-2">
+                    <i class="bi bi-check-circle-fill display-1"></i>
+                </div>
+                <span class="badge bg-white text-success fs-6 fw-extrabold px-4 py-2 rounded-pill d-inline-block mx-auto mb-3">
+                    ✅ BOLETO VÁLIDO
+                </span>
+                <h2 class="fw-extrabold text-white letter-spacing-1 mb-2">{{ boleto.codigo_unico }}</h2>
+                <h4 class="fw-bold mb-3">{{ boleto.nombre_comprador }}</h4>
+
+                <div class="bg-white bg-opacity-20 p-3 rounded-3 mb-4 text-start small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Solicitud Origen:</span>
+                        <strong>#{{ boleto.solicitud.id }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Teléfono:</span>
+                        <strong>{{ boleto.solicitud.telefono }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Fecha Confirmación:</span>
+                        <strong>{{ boleto.fecha_creacion|date:"d/m/Y H:i" }}</strong>
+                    </div>
+                </div>
+
+                <!-- BOTÓN MARCAR COMO UTILIZADO -->
+                <form method="POST" action="{% url 'marcar_boleto_utilizado' boleto.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light btn-lg text-success fw-extrabold w-100 py-3 shadow">
+                        <i class="bi bi-door-open-fill me-2"></i> MARCAR COMO UTILIZADO (INGRESÓ)
+                    </button>
+                </form>
+            </div>
+
+        {% elif resultado == 'UTILIZADO' %}
+            <!-- ⚠️ BOLETO YA UTILIZADO -->
+            <div class="card card-custom status-card-used p-4 p-md-5 text-center shadow-lg mb-4">
+                <div class="mb-2">
+                    <i class="bi bi-exclamation-triangle-fill display-1"></i>
+                </div>
+                <span class="badge bg-white text-warning fs-6 fw-extrabold px-4 py-2 rounded-pill d-inline-block mx-auto mb-3">
+                    ⚠️ BOLETO YA UTILIZADO
+                </span>
+                <h2 class="fw-extrabold text-white letter-spacing-1 mb-2">{{ boleto.codigo_unico }}</h2>
+                <h4 class="fw-bold mb-3">{{ boleto.nombre_comprador }}</h4>
+
+                <div class="bg-white bg-opacity-20 p-3 rounded-3 mb-3 text-center">
+                    <span class="d-block small">Fecha y Hora de Ingreso Registrada:</span>
+                    <strong class="fs-5"><i class="bi bi-clock-history me-1"></i>{{ boleto.fecha_uso|date:"d/m/Y H:i:s" }}</strong>
+                </div>
+
+                <p class="mb-0 small text-white-50">Este boleto ya fue escaneado e ingresado anteriormente. NO PERMITIR RE-INGRESO.</p>
+            </div>
+
+        {% else %}
+            <!-- ❌ BOLETO NO VÁLIDO / INEXISTENTE -->
+            <div class="card card-custom status-card-invalid p-4 p-md-5 text-center shadow-lg mb-4">
+                <div class="mb-2">
+                    <i class="bi bi-x-circle-fill display-1"></i>
+                </div>
+                <span class="badge bg-white text-danger fs-6 fw-extrabold px-4 py-2 rounded-pill d-inline-block mx-auto mb-3">
+                    ❌ BOLETO NO VÁLIDO
+                </span>
+                <h3 class="fw-bold text-white mb-2">Código: {{ codigo }}</h3>
+
+                <p class="lead fs-6 mb-3">
+                    El código ingresado no existe en el sistema o no corresponde a una solicitud aprobada.
+                </p>
+
+                <div class="bg-white bg-opacity-20 p-3 rounded-3 small">
+                    <i class="bi bi-shield-x me-1"></i> Verifica si el boleto fue rechazado o si el código fue digitado incorrectamente.
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let html5QrcodeScanner = null;
+
+    function startScanner() {
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                /* verbose= */ false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Redirigir automáticamente al detectar un QR
+        window.location.href = "{% url 'validar_qr' %}?codigo=" + encodeURIComponent(decodedText);
+    }
+
+    function onScanFailure(error) {
+        // Ignorar errores continuos de escaneo
+    }
+</script>
+{% endblock %}

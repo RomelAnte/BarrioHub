@@ -1,0 +1,26 @@
+{% extends 'feria/base.html' %}
+
+{% block title %}Confirmar Eliminación — Feria de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px;">
+    <div class="card card-custom bg-white p-4 text-center">
+        <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle d-inline-block mx-auto mb-3" style="width: 70px; height: 70px; padding: 15px 0;">
+            <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+        </div>
+        
+        <h4 class="fw-bold mb-2">¿Eliminar este aporte?</h4>
+        <p class="text-secondary mb-4">
+            Estás a punto de eliminar permanentemente el aporte <strong>"{{ aporte.nombre_aporte }}"</strong> registrado por el <strong>{{ aporte.barrio }}</strong>.
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{% url 'aportes_list' %}" class="btn btn-light fw-semibold px-4">Cancelar</a>
+                <button type="submit" class="btn btn-danger fw-semibold px-4">Sí, Eliminar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
