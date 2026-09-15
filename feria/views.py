@@ -239,7 +239,7 @@ def solicitud_digital(request):
         form = SolicitudBoletoForm(request.POST, request.FILES)
         if form.is_valid():
             solicitud = form.save(commit=False)
-            solicitud.precio_unitario = 2.00  # Precio base de boleto preventa
+            solicitud.precio_unitario = 3.00  # Precio base de boleto preventa
             solicitud.total = solicitud.cantidad * solicitud.precio_unitario
             solicitud.estado = 'pendiente'
             solicitud.save()
@@ -256,7 +256,7 @@ def solicitud_digital(request):
         'titular': 'Comité Feria de Seguridad',
         'identificacion': '1798765432001',
         'email': 'feriaseguridad.barrios@gmail.com',
-        'precio_unitario': 2.00
+        'precio_unitario': 3.00
     }
     return render(request, 'feria/solicitud_digital.html', {'form': form, 'datos_banco': datos_banco})
 

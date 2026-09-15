@@ -70,7 +70,7 @@ class SolicitudBoleto(models.Model):
     telefono = models.CharField(max_length=50, verbose_name="Teléfono WhatsApp")
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
     cantidad = models.PositiveIntegerField(default=1, verbose_name="Cantidad de Boletos")
-    precio_unitario = models.DecimalField(max_digits=6, decimal_places=2, default=2.00, verbose_name="Precio Unitario ($)")
+    precio_unitario = models.DecimalField(max_digits=6, decimal_places=2, default=3.00, verbose_name="Precio Unitario ($)")
     total = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Total ($)")
     comprobante = models.ImageField(upload_to='comprobantes/', verbose_name="Comprobante de Pago")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente', verbose_name="Estado")

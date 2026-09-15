@@ -90,7 +90,7 @@
                         <div class="col-12">
                             <div class="p-3 bg-primary bg-opacity-10 border border-primary rounded-3 d-flex justify-content-between align-items-center">
                                 <span class="fw-semibold text-primary">Valor Total a Transferir:</span>
-                                <span class="h3 fw-bold text-primary mb-0" id="total_display">$2.00</span>
+                                <span class="h3 fw-bold text-primary mb-0" id="total_display">$3.00</span>
                             </div>
                         </div>
 
@@ -119,7 +119,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const inputCantidad = document.getElementById('id_cantidad');
         const displayTotal = document.getElementById('total_display');
-        const precioUnitario = 2.00;
+        const precioUnitario = 3.00;
 
         function calcularTotal() {
             let cantidad = parseInt(inputCantidad.value) || 1;
