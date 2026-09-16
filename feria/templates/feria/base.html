@@ -144,8 +144,12 @@
                         <i class="bi bi-qr-code-scan fs-5"></i>
                         <span>Escanear / Validar QR</span>
                     </a>
-
+                    <a href="{% url 'admin_boletos' %}" class="btn btn-warning text-dark font-weight-bold fw-bold d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm me-2">
+                        <i class="bi bi-ticket fs-5"></i>
+                        <span>Administración de Boletos</span>
+                    </a>
                     {% if user.is_authenticated %}
+
                         <div class="dropdown">
                             <button class="btn btn-outline-light text-white dropdown-toggle fw-semibold rounded-3" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle text-info me-1"></i> {{ user.username }}
