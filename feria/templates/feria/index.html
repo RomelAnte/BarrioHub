@@ -34,7 +34,7 @@
 
     <!-- TARJETAS DE ESTADÍSTICAS -->
     <div class="row g-3 mb-5">
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-12">
             <div class="card card-custom p-3 border-start border-primary border-4 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
@@ -49,22 +49,7 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-6">
-            <div class="card card-custom p-3 border-start border-success border-4 bg-white">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-muted small fw-bold uppercase">Boletos Físicos</div>
-                        <div class="h2 fw-bold mb-0 text-success">{{ stats.boletos_fisicos_vendidos }}</div>
-                    </div>
-                    <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle">
-                        <i class="bi bi-ticket-perforated fs-3"></i>
-                    </div>
-                </div>
-                <small class="text-muted mt-2 d-block">{{ stats.boletos_fisicos_disponibles }} Disponibles</small>
-            </div>
-        </div>
-
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-12">
             <div class="card card-custom p-3 border-start border-warning border-4 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
@@ -79,7 +64,7 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-12">
             <div class="card card-custom p-3 border-start border-info border-4 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
@@ -100,14 +85,14 @@
 
     <div class="row g-4">
         <!-- 1. APORTES DE BARRIOS -->
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-3">
             <div class="card card-custom h-100 p-4 bg-white">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div class="p-3 bg-primary text-white rounded-3">
                         <i class="bi bi-buildings-fill fs-3"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0">1. Aportes de los 3 Barrios</h5>
+                        <h5 class="fw-bold mb-0">1. Aportes de Barrios</h5>
                         <small class="text-muted">Registro y consulta</small>
                     </div>
                 </div>
@@ -122,38 +107,15 @@
             </div>
         </div>
 
-        <!-- 2. BOLETOS FÍSICOS -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card card-custom h-100 p-4 bg-white">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="p-3 bg-success text-white rounded-3">
-                        <i class="bi bi-ticket-perforated-fill fs-3"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0">2. Boletos Físicos</h5>
-                        <small class="text-muted">Control de talonario</small>
-                    </div>
-                </div>
-                <p class="text-secondary small">
-                    Administra los boletos físicos impresos entregados al barrio. Registra compradores y mantén el control de inventario.
-                </p>
-                <div class="mt-auto">
-                    <a href="{% url 'boletos_fisicos_list' %}" class="btn btn-outline-success w-100 fw-semibold rounded-3">
-                        Controlar Físicos <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. PREVENTA DIGITAL PUBLICAS -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 2. PREVENTA DIGITAL PUBLICAS -->
+        <div class="col-md-6 col-lg-3">
             <div class="card card-custom h-100 p-4 bg-white">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div class="p-3 bg-purple bg-gradient text-white rounded-3" style="background-color: #8b5cf6;">
                         <i class="bi bi-cart-check-fill fs-3"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0">3. Formulario Preventa Digital</h5>
+                        <h5 class="fw-bold mb-0">2. Preventa Digital</h5>
                         <small class="text-muted">Vista del público</small>
                     </div>
                 </div>
@@ -162,21 +124,21 @@
                 </p>
                 <div class="mt-auto">
                     <a href="{% url 'solicitud_digital' %}" class="btn btn-outline-dark w-100 fw-semibold rounded-3">
-                        Ir al Formulario Público <i class="bi bi-arrow-right ms-1"></i>
+                        Ir al Formulario <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- 4. REVISIÓN MANUAL ADMIN -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 3. REVISIÓN MANUAL ADMIN -->
+        <div class="col-md-6 col-lg-3">
             <div class="card card-custom h-100 p-4 bg-white">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div class="p-3 bg-warning text-dark rounded-3">
                         <i class="bi bi-person-check-fill fs-3"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0">4. Panel Administración</h5>
+                        <h5 class="fw-bold mb-0">3. Panel Administración</h5>
                         <small class="text-muted">Revisión de comprobantes</small>
                     </div>
                 </div>
@@ -191,15 +153,15 @@
             </div>
         </div>
 
-        <!-- 5. VALIDACIÓN QR -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 4. VALIDACIÓN QR -->
+        <div class="col-md-6 col-lg-3">
             <div class="card card-custom h-100 p-4 bg-white border border-2 border-warning">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div class="p-3 bg-dark text-warning rounded-3">
                         <i class="bi bi-qr-code-scan fs-3"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0">5. Validación QR Puerta</h5>
+                        <h5 class="fw-bold mb-0">4. Validación QR Puerta</h5>
                         <small class="text-muted">Control de acceso evento</small>
                     </div>
                 </div>

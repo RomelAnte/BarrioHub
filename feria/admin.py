@@ -1,17 +1,11 @@
 from django.contrib import admin
-from .models import Aporte, BoletoFisico, SolicitudBoleto, BoletoDigital
+from .models import Aporte, SolicitudBoleto, BoletoDigital
 
 @admin.register(Aporte)
 class AporteAdmin(admin.ModelAdmin):
     list_display = ('nombre_aporte', 'barrio', 'categoria', 'responsable', 'contacto', 'fecha_registro')
     list_filter = ('barrio', 'categoria')
     search_fields = ('nombre_aporte', 'responsable', 'contacto', 'descripcion')
-
-@admin.register(BoletoFisico)
-class BoletoFisicoAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'estado', 'comprador', 'telefono', 'fecha_venta')
-    list_filter = ('estado',)
-    search_fields = ('numero', 'comprador', 'telefono')
 
 @admin.register(SolicitudBoleto)
 class SolicitudBoletoAdmin(admin.ModelAdmin):

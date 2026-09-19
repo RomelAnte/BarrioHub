@@ -6,8 +6,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
-from .models import Aporte, BoletoFisico, SolicitudBoleto, BoletoDigital
-from .forms import AporteForm, BoletoFisicoForm, SolicitudBoletoForm
+from .models import Aporte, SolicitudBoleto, BoletoDigital
+from .forms import AporteForm, SolicitudBoletoForm
 
 
 def index(request):
@@ -15,8 +15,6 @@ def index(request):
     stats = {
         'total_aportes': Aporte.objects.count(),
         'emprendimientos': Aporte.objects.filter(categoria='Emprendimiento').count(),
-        'boletos_fisicos_disponibles': BoletoFisico.objects.filter(estado='disponible').count(),
-        'boletos_fisicos_vendidos': BoletoFisico.objects.filter(estado='vendido').count(),
         'solicitudes_pendientes': SolicitudBoleto.objects.filter(estado='pendiente').count(),
         'boletos_digitales_validos': BoletoDigital.objects.filter(estado='confirmado').count(),
         'boletos_digitales_utilizados': BoletoDigital.objects.filter(estado='utilizado').count(),
@@ -137,96 +135,7 @@ def aporte_delete(request, pk):
     return render(request, 'feria/aporte_confirm_delete.html', {'aporte': aporte})
 
 
-# ==========================================
-# 2. MÓDULO BOLETOS FÍSICOS (PROTEGIDO)
-# ==========================================
 
-@login_required(login_url='login')
-def boletos_fisicos_list(request):
-    """Gestión de inventario de boletos físicos del barrio"""
-    query = request.GET.get('q', '').strip()
-    estado_filter = request.GET.get('estado', '').strip()
-
-    boletos = BoletoFisico.objects.all()
-
-    if query:
-        boletos = boletos.filter(
-            Q(numero__icontains=query) |
-            Q(comprador__icontains=query) |
-            Q(telefono__icontains=query)
-        )
-
-    if estado_filter:
-        boletos = boletos.filter(estado=estado_filter)
-
-    total_disponibles = BoletoFisico.objects.filter(estado='disponible').count()
-    total_vendidos = BoletoFisico.objects.filter(estado='vendido').count()
-
-    context = {
-        'boletos': boletos,
-        'query': query,
-        'estado_filter': estado_filter,
-        'total_disponibles': total_disponibles,
-        'total_vendidos': total_vendidos,
-    }
-    return render(request, 'feria/boletos_fisicos.html', context)
-
-
-@login_required(login_url='login')
-def boleto_fisico_create(request):
-    """Crear boleto físico individual o lote"""
-    if request.method == 'POST':
-        if 'crear_lote' in request.POST:
-            prefijo = request.POST.get('prefijo', 'F-').strip()
-            inicio = int(request.POST.get('inicio', 1))
-            fin = int(request.POST.get('fin', 50))
-            creados = 0
-            for i in range(inicio, fin + 1):
-                num_str = f"{prefijo}{i:03d}"
-                if not BoletoFisico.objects.filter(numero=num_str).exists():
-                    BoletoFisico.objects.create(numero=num_str, estado='disponible')
-                    creados += 1
-            messages.success(request, f'Se han generado {creados} boletos físicos correctamente.')
-            return redirect('boletos_fisicos_list')
-        else:
-            form = BoletoFisicoForm(request.POST)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Boleto físico creado exitosamente.')
-                return redirect('boletos_fisicos_list')
-    else:
-        form = BoletoFisicoForm()
-    return render(request, 'feria/boleto_fisico_form.html', {'form': form})
-
-
-@login_required(login_url='login')
-def boleto_fisico_marcar_vendido(request, pk):
-    """Marcar boleto físico como vendido"""
-    boleto = get_object_or_404(BoletoFisico, pk=pk)
-    if request.method == 'POST':
-        comprador = request.POST.get('comprador', '').strip()
-        telefono = request.POST.get('telefono', '').strip()
-        boleto.estado = 'vendido'
-        boleto.comprador = comprador
-        boleto.telefono = telefono
-        boleto.fecha_venta = timezone.now()
-        boleto.save()
-        messages.success(request, f'Boleto #{boleto.numero} registrado como VENDIDO a {comprador or "Cliente"}.')
-    return redirect('boletos_fisicos_list')
-
-
-@login_required(login_url='login')
-def boleto_fisico_marcar_disponible(request, pk):
-    """Revertir estado a disponible"""
-    boleto = get_object_or_404(BoletoFisico, pk=pk)
-    if request.method == 'POST':
-        boleto.estado = 'disponible'
-        boleto.comprador = ''
-        boleto.telefono = ''
-        boleto.fecha_venta = None
-        boleto.save()
-        messages.info(request, f'Boleto #{boleto.numero} marcado como DISPONIBLE.')
-    return redirect('boletos_fisicos_list')
 
 
 # ==========================================

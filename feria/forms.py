@@ -1,5 +1,5 @@
 from django import forms
-from .models import Aporte, BoletoFisico, SolicitudBoleto
+from .models import Aporte, SolicitudBoleto
 
 class AporteForm(forms.ModelForm):
     class Meta:
@@ -15,17 +15,6 @@ class AporteForm(forms.ModelForm):
         }
 
 
-class BoletoFisicoForm(forms.ModelForm):
-    class Meta:
-        model = BoletoFisico
-        fields = ['numero', 'estado', 'comprador', 'telefono', 'notas']
-        widgets = {
-            'numero': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. F-001 o 1001'}),
-            'estado': forms.Select(attrs={'class': 'form-select'}),
-            'comprador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del comprador (si aplica)'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono del comprador'}),
-            'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Observaciones de la venta'}),
-        }
 
 
 class SolicitudBoletoForm(forms.ModelForm):

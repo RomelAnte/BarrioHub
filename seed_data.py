@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from feria.models import Aporte, BoletoFisico, SolicitudBoleto, BoletoDigital
+from feria.models import Aporte, SolicitudBoleto, BoletoDigital
 from django.core.files.base import ContentFile
 import io
 from PIL import Image, ImageDraw
@@ -77,22 +77,7 @@ for item in aportes_data:
         defaults=item
     )
 
-# 2. BOLETOS FÍSICOS
-for i in range(1, 21):
-    num_str = f"F-{i:03d}"
-    estado = 'vendido' if i <= 5 else 'disponible'
-    comprador = f"Cliente {i}" if estado == 'vendido' else ""
-    telefono = f"09900000{i:02d}" if estado == 'vendido' else ""
-    BoletoFisico.objects.get_or_create(
-        numero=num_str,
-        defaults={
-            'estado': estado,
-            'comprador': comprador,
-            'telefono': telefono
-        }
-    )
-
-# 3. SOLICITUDES Y BOLETOS DIGITALES CON QR
+# 2. SOLICITUDES Y BOLETOS DIGITALES CON QR
 if not SolicitudBoleto.objects.exists():
     # Solicitud 1 Aprobada
     sol1 = SolicitudBoleto.objects.create(
