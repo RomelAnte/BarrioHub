@@ -303,6 +303,9 @@ def admin_boletos(request):
             Q(nombre_comprador__icontains=query)
         )
 
+    for sol in solicitudes:
+        sol.wa_link = sol.get_whatsapp_link(request)
+
     context = {
         'solicitudes': solicitudes,
         'boletos_digitales': boletos_digitales,

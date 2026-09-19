@@ -88,6 +88,33 @@ class SolicitudBoleto(models.Model):
             self.total = self.cantidad * self.precio_unitario
         super().save(*args, **kwargs)
 
+    def get_whatsapp_link(self, request=None):
+        import urllib.parse
+        phone_digits = ''.join(filter(str.isdigit, self.telefono))
+        if phone_digits.startswith('0'):
+            phone_digits = '593' + phone_digits[1:]
+        elif not phone_digits.startswith('593') and len(phone_digits) == 9:
+            phone_digits = '593' + phone_digits
+
+        if request:
+            url_detalle = request.build_absolute_uri(f"/preventa/{self.pk}/detalle/")
+        else:
+            url_detalle = f"/preventa/{self.pk}/detalle/"
+
+        mensaje = (
+            f"¡Hola {self.nombre_comprador}! 👋🏼\n\n"
+            f"Tu pago para la Feria ha sido *APROBADO* exitosamente. 🎉\n\n"
+            f"🎟️ *Detalle de tu compra:*\n"
+            f"• Solicitud #{self.id}\n"
+            f"• Boletos: {self.cantidad}\n"
+            f"• Total: ${self.total} USD\n\n"
+            f"📲 *Accede a tus boletos digitales con Código QR aquí:*\n"
+            f"{url_detalle}\n\n"
+            f"¡Presenta el código QR en la entrada el día de la feria! 🎪"
+        )
+
+        return f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(mensaje)}"
+
     def __str__(self):
         return f"Solicitud #{self.id} - {self.nombre_comprador} ({self.cantidad} boletos)"
 

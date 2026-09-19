@@ -6,15 +6,19 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-username = "admin"
-password = "feria2026"
-email = "admin@feriaseguridad.com"
+username = os.environ.get("ADMIN_USERNAME", "admin")
+password = os.environ.get("ADMIN_PASSWORD")
+email = os.environ.get("ADMIN_EMAIL", "admin@barriohub.com")
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username=username, password=password, email=email)
-    print(f"[OK] Usuario de administracion creado: {username} / {password}")
+if not password:
+    print("[INFO] ADMIN_PASSWORD no especificada en variables de entorno. Omitiendo creación automática de superusuario.")
 else:
-    user = User.objects.get(username=username)
-    user.set_password(password)
-    user.save()
-    print(f"[OK] Contrasena actualizada para usuario: {username} / {password}")
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, password=password, email=email)
+        print(f"[OK] Usuario de administración creado para: {username}")
+    else:
+        user = User.objects.get(username=username)
+        user.set_password(password)
+        user.save()
+        print(f"[OK] Contraseña actualizada para usuario: {username}")
+
