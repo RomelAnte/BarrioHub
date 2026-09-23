@@ -161,8 +161,8 @@ def solicitud_digital(request):
     datos_banco = {
         'banco': 'Banco Pichincha',
         'tipo_cuenta': 'Cuenta de Ahorros',
-        'numero_cuenta': '2209876543',
-        'titular': 'Comité Feria de Seguridad',
+        'numero_cuenta': '2202628950',
+        'titular': 'Eloy Irrael Palacios Vargas',
         'identificacion': '1798765432001',
         'email': 'feriaseguridad.barrios@gmail.com',
         'precio_unitario': 3.00
