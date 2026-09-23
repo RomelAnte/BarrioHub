@@ -20,12 +20,27 @@ class AporteForm(forms.ModelForm):
 class SolicitudBoletoForm(forms.ModelForm):
     class Meta:
         model = SolicitudBoleto
-        fields = ['nombre_comprador', 'cedula', 'telefono', 'email', 'cantidad', 'comprobante']
+        fields = ['nombre_comprador', 'cedula', 'telefono', 'email', 'cantidad', 'numero_comprobante', 'comprobante']
         widgets = {
             'nombre_comprador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Juan Pérez'}),
             'cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1712345678'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0991234567'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'correo@ejemplo.com (opcional)'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 50, 'value': 1, 'id': 'id_cantidad'}),
+            'numero_comprobante': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. 00987654 / Nro. de Transferencia'}),
             'comprobante': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+
+    def clean_numero_comprobante(self):
+        numero = self.cleaned_data.get('numero_comprobante')
+        if numero:
+            numero = numero.strip()
+            # Verificar si ya existe en solicitudes pendientes o confirmadas
+            existe = SolicitudBoleto.objects.filter(
+                numero_comprobante__iexact=numero,
+                estado__in=['pendiente', 'confirmado']
+            ).exclude(pk=self.instance.pk if self.instance else None).exists()
+
+            if existe:
+                raise forms.ValidationError("Este número de comprobante/transferencia ya ha sido registrado en otra solicitud activa.")
+        return numero

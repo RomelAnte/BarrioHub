@@ -73,6 +73,7 @@ class SolicitudBoleto(models.Model):
     precio_unitario = models.DecimalField(max_digits=6, decimal_places=2, default=3.00, verbose_name="Precio Unitario ($)")
     total = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Total ($)")
     comprobante = models.ImageField(upload_to='comprobantes/', verbose_name="Comprobante de Pago")
+    numero_comprobante = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nro. de Comprobante / Referencia")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente', verbose_name="Estado")
     notas_admin = models.TextField(blank=True, verbose_name="Notas del Administrador")
     fecha_solicitud = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Solicitud")

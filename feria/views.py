@@ -199,7 +199,8 @@ def admin_boletos(request):
         solicitudes = solicitudes.filter(
             Q(nombre_comprador__icontains=query) |
             Q(cedula__icontains=query) |
-            Q(telefono__icontains=query)
+            Q(telefono__icontains=query) |
+            Q(numero_comprobante__icontains=query)
         )
 
     if estado_filter:
@@ -232,12 +233,20 @@ def aprobar_solicitud(request, pk):
     
     if request.method == 'POST':
         if solicitud.estado != 'confirmado':
+            # Permitir al administrador ajustar la cantidad si el pago no coincide
+            cantidad_raw = request.POST.get('cantidad_aprobada')
+            if cantidad_raw and cantidad_raw.isdigit():
+                cant_aprobada = int(cantidad_raw)
+                if cant_aprobada > 0 and cant_aprobada != solicitud.cantidad:
+                    solicitud.cantidad = cant_aprobada
+                    solicitud.total = solicitud.cantidad * solicitud.precio_unitario
+
             solicitud.estado = 'confirmado'
             solicitud.fecha_respuesta = timezone.now()
             solicitud.notas_admin = request.POST.get('notas_admin', '').strip()
             solicitud.save()
 
-            # Generar N boletos digitales según la cantidad solicitada
+            # Generar N boletos digitales según la cantidad final
             for i in range(solicitud.cantidad):
                 consecutivo = BoletoDigital.objects.count() + 1
                 codigo = f"FERIA-2026-{consecutivo:06d}"
