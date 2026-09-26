@@ -334,3 +334,30 @@ def marcar_boleto_utilizado(request, pk):
         elif boleto.estado == 'utilizado':
             messages.warning(request, f'⚠️ Este boleto ya fue utilizado el {boleto.fecha_uso.strftime("%d/%m/%Y %H:%M")}.')
     return redirect(f'/validar/?codigo={boleto.codigo_unico}')
+
+
+@login_required(login_url='login')
+def reset_boletos_view(request):
+    """Eliminar solicitudes y boletos de prueba y reiniciar el contador de IDs (auto-increment) a 1"""
+    if request.method == 'POST' or request.GET.get('confirm') == 'true':
+        from django.db import connection
+        reset_all = request.POST.get('reset_all') == '1' or request.GET.get('reset_all') == '1'
+        
+        BoletoDigital.objects.all().delete()
+        SolicitudBoleto.objects.all().delete()
+        
+        tables = ['feria_solicitudboleto', 'feria_boletodigital', 'feria_boletofisico']
+        
+        if reset_all:
+            Aporte.objects.all().delete()
+            tables.append('feria_aporte')
+            msg = '¡Se han eliminado todas las solicitudes, boletos y aportes, y se reiniciaron los IDs a 1!'
+        else:
+            msg = '¡Se han eliminado todas las solicitudes y boletos de prueba, y los IDs fueron reiniciados a 1!'
+
+        with connection.cursor() as cursor:
+            tables_sql = ", ".join(f"'{t}'" for t in tables)
+            cursor.execute(f"DELETE FROM sqlite_sequence WHERE name IN ({tables_sql});")
+        
+        messages.success(request, msg)
+    return redirect('admin_boletos')

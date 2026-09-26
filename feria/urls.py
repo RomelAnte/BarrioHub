@@ -22,6 +22,7 @@ urlpatterns = [
 
     # 4. Administración de Boletos
     path('admin-boletos/', views.admin_boletos, name='admin_boletos'),
+    path('admin-boletos/reset/', views.reset_boletos_view, name='reset_boletos'),
     path('admin-boletos/<int:pk>/aprobar/', views.aprobar_solicitud, name='aprobar_solicitud'),
     path('admin-boletos/<int:pk>/rechazar/', views.rechazar_solicitud, name='rechazar_solicitud'),
 

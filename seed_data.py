@@ -4,22 +4,12 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from feria.models import Aporte, SolicitudBoleto, BoletoDigital
-from django.core.files.base import ContentFile
-import io
-from PIL import Image, ImageDraw
+from feria.models import Aporte, SolicitudBoleto, BoletoDigital, BoletoFisico
+from django.db import connection
 
-def create_sample_image():
-    img = Image.new('RGB', (400, 400), color=(37, 99, 235))
-    d = ImageDraw.Draw(img)
-    d.text((50, 180), "COMPROBANTE FERIA 2026", fill=(255, 255, 255))
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    return ContentFile(buf.getvalue(), name="sample_comprobante.png")
+print("Iniciando verificación y mantenimiento de datos...")
 
-print("Poblando datos de prueba...")
-
-# 1. APORTES
+# 1. APORTES BASE DE EJEMPLO
 aportes_data = [
     {
         'barrio': 'San Luis',
@@ -77,47 +67,16 @@ for item in aportes_data:
         defaults=item
     )
 
-# 2. SOLICITUDES Y BOLETOS DIGITALES CON QR
-if not SolicitudBoleto.objects.exists():
-    # Solicitud 1 Aprobada
-    sol1 = SolicitudBoleto.objects.create(
-        nombre_comprador="Pedro Picapiedra",
-        cedula="1712345678",
-        telefono="0991234567",
-        email="pedro@ejemplo.com",
-        cantidad=2,
-        precio_unitario=2.00,
-        total=4.00,
-        comprobante=create_sample_image(),
-        estado="confirmado",
-        notas_admin="Transferencia confirmada en Banco Pichincha"
-    )
+def reset_tickets_and_ids():
+    """Elimina solicitudes/boletos de prueba y reinicia los contadores de secuencia de SQLite a 1"""
+    BoletoDigital.objects.all().delete()
+    SolicitudBoleto.objects.all().delete()
+    BoletoFisico.objects.all().delete()
+    
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('feria_solicitudboleto', 'feria_boletodigital', 'feria_boletofisico');")
+    
+    print("[OK] Se han limpiado las solicitudes y reiniciado la secuencia de IDs a 1.")
 
-    b1 = BoletoDigital.objects.create(
-        codigo_unico="FERIA-2026-000001",
-        solicitud=sol1,
-        nombre_comprador=sol1.nombre_comprador,
-        estado="confirmado"
-    )
-
-    b2 = BoletoDigital.objects.create(
-        codigo_unico="FERIA-2026-000002",
-        solicitud=sol1,
-        nombre_comprador=sol1.nombre_comprador,
-        estado="confirmado"
-    )
-
-    # Solicitud 2 Pendiente
-    sol2 = SolicitudBoleto.objects.create(
-        nombre_comprador="Vilma Palma",
-        cedula="1798765432",
-        telefono="0987654321",
-        email="vilma@ejemplo.com",
-        cantidad=3,
-        precio_unitario=2.00,
-        total=6.00,
-        comprobante=create_sample_image(),
-        estado="pendiente"
-    )
-
-print("[OK] Datos de prueba creados exitosamente.")
+if __name__ == '__main__':
+    reset_tickets_and_ids()
