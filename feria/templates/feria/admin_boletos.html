@@ -24,7 +24,7 @@
             <div class="col-md-7">
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Buscar por comprador, cédula o teléfono...">
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Buscar por comprador o teléfono...">
                 </div>
             </div>
 
@@ -71,7 +71,7 @@
                             <td class="ps-4 fw-bold">#{{ sol.id }}</td>
                             <td>
                                 <div class="fw-bold text-dark">{{ sol.nombre_comprador }}</div>
-                                <small class="text-muted">C.I.: {{ sol.cedula }}</small>
+                                {% if sol.cedula %}<small class="text-muted">C.I.: {{ sol.cedula }}</small>{% endif %}
                             </td>
                             <td>
                                 <div><i class="bi bi-whatsapp text-success me-1"></i>{{ sol.telefono }}</div>

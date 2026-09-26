@@ -36,7 +36,7 @@
             <div>
                 <span class="badge bg-warning text-dark mb-1 fw-bold">SOLICITUD DE BOLETOS #{{ solicitud.id }}</span>
                 <h3 class="fw-extrabold mb-0 text-dark">{{ solicitud.nombre_comprador }}</h3>
-                <small class="text-muted"><i class="bi bi-card-text me-1"></i>C.I.: {{ solicitud.cedula }} | <i class="bi bi-whatsapp text-success me-1"></i>{{ solicitud.telefono }}</small>
+                <small class="text-muted">{% if solicitud.cedula %}<i class="bi bi-card-text me-1"></i>C.I.: {{ solicitud.cedula }} | {% endif %}<i class="bi bi-whatsapp text-success me-1"></i>{{ solicitud.telefono }}</small>
             </div>
             <div>
                 {% if solicitud.estado == 'pendiente' %}
@@ -52,6 +52,29 @@
                         <i class="bi bi-x-circle-fill me-1"></i> RECHAZADO
                     </span>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER GUARDAR EN WHATSAPP PARA NO PERDER EL ENLACE -->
+    <div class="card p-3 p-md-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 16px;">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-success text-white p-2.5 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; flex-shrink: 0;">
+                    <i class="bi bi-whatsapp fs-4"></i>
+                </div>
+                <div>
+                    <strong class="d-block text-dark fs-6 mb-1">📱 Guardar este enlace en tu WhatsApp</strong>
+                    <small class="text-secondary">Para no perder esta pantalla al cerrar el navegador, envíate el enlace directo a tu WhatsApp.</small>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center flex-shrink-0">
+                <a href="{{ wa_consulta_link }}" target="_blank" class="btn btn-success fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-whatsapp me-1"></i> Guardar en mi WhatsApp
+                </a>
+                <button type="button" onclick="copiarEnlacePublico()" class="btn btn-outline-dark fw-bold px-3 py-2 rounded-3" title="Copiar enlace al portapapeles">
+                    <i class="bi bi-link-45deg me-1"></i> Copiar Enlace
+                </button>
             </div>
         </div>
     </div>
@@ -133,4 +156,13 @@
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copiarEnlacePublico() {
+        navigator.clipboard.writeText(window.location.href);
+        alert("¡Enlace de consulta copiado al portapapeles!\nPuedes pegarlo en tus notas o enviártelo por WhatsApp.");
+    }
+</script>
 {% endblock %}

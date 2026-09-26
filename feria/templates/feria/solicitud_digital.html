@@ -97,26 +97,69 @@
 
     <div class="row g-4 justify-content-center">
 
-        <!-- COLUMNA IZQUIERDA: DATOS PARA TRANSFERIR -->
+        <!-- COLUMNA IZQUIERDA: GUÍA DE COMPRA Y DATOS BANCARIOS -->
         <div class="col-lg-5">
-            <div class="card card-custom p-4 bg-white border-top border-4 border-warning h-100">
+            <div class="card card-custom p-4 bg-white border-top border-4 border-warning mb-4 shadow-sm">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="p-3 bg-warning bg-opacity-20 text-warning rounded-3">
-                        <i class="bi bi-bank fs-3" style="color: #b45309;"></i>
+                    <div class="p-3 bg-warning bg-opacity-20 text-warning rounded-3 fs-3" style="color: #b45309 !important;">
+                        🛒
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0 text-dark">Pasos para comprar</h4>
-                        <small class="text-muted">Transferencia directa y segura</small>
+                        <h4 class="fw-bold mb-0 text-dark">¿Cómo adquirir tu boleto digital?</h4>
+                        <small class="text-muted">Paso a paso para tu compra</small>
                     </div>
                 </div>
 
-                <ol class="ps-3 mb-4 text-secondary small">
-                    <li class="mb-2">Realiza la transferencia por el total según la cantidad de boletos.</li>
-                    <li class="mb-2">Completa tus datos en el formulario.</li>
-                    <li>Subes la foto/captura de tu comprobante y ¡listo! El comité lo aprueba y te genera tu QR.</li>
-                </ol>
+                <div class="steps-list mb-4">
+                    <div class="d-flex gap-3 mb-3 align-items-start">
+                        <span class="badge bg-warning text-dark rounded-circle p-2 fs-6 fw-bold" style="min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">1</span>
+                        <div>
+                            <strong class="d-block text-dark">Realiza la transferencia</strong>
+                            <small class="text-muted d-block">Transfiere $3 por cada boleto a la cuenta indicada abajo.</small>
+                        </div>
+                    </div>
 
-                <!-- DATOS DE LA CUENTA -->
+                    <div class="d-flex gap-3 mb-3 align-items-start">
+                        <span class="badge bg-warning text-dark rounded-circle p-2 fs-6 fw-bold" style="min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">2</span>
+                        <div>
+                            <strong class="d-block text-dark">Completa el formulario</strong>
+                            <small class="text-muted d-block">Ingresa tus datos y registra el número de comprobante de la transferencia.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-3 align-items-start">
+                        <span class="badge bg-warning text-dark rounded-circle p-2 fs-6 fw-bold" style="min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">3</span>
+                        <div>
+                            <strong class="d-block text-dark">Adjunta tu comprobante</strong>
+                            <small class="text-muted d-block">Sube una captura o imagen de la transferencia realizada.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-3 align-items-start">
+                        <span class="badge bg-warning text-dark rounded-circle p-2 fs-6 fw-bold" style="min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">4</span>
+                        <div>
+                            <strong class="d-block text-dark">Validamos tu pago</strong>
+                            <small class="text-muted d-block">Nuestro equipo verificará la transferencia y, una vez confirmada, procesará tu solicitud.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-3 align-items-start">
+                        <span class="badge bg-warning text-dark rounded-circle p-2 fs-6 fw-bold" style="min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">5</span>
+                        <div>
+                            <strong class="d-block text-dark">Recibe tu boleto digital 🎟️</strong>
+                            <small class="text-muted d-block">Te enviaremos tu boleto con código QR, que podrás presentar el día de la feria.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 py-2.5 px-3 small mb-0 rounded-3 text-dark">
+                    🔒 <strong>Importante:</strong> tu boleto será generado una vez que el pago haya sido verificado.
+                </div>
+            </div>
+
+            <!-- DATOS DE LA CUENTA -->
+            <div class="card card-custom p-4 bg-white border-0 shadow-sm">
+                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-bank text-warning me-2" style="color: #b45309 !important;"></i>Cuenta Bancaria para Depósito / Transferencia</h5>
                 <div class="card-banco p-3 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
                         <span class="text-muted small">Banco:</span>
@@ -139,8 +182,8 @@
                     </div>
                 </div>
 
-                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 py-2 small mb-0 rounded-3 text-dark">
-                    <i class="bi bi-info-circle-fill me-1 text-warning"></i> <strong>Organizan:</strong> Comité de
+                <div class="alert alert-secondary border-0 py-2 small mb-0 rounded-3 text-dark">
+                    <i class="bi bi-info-circle-fill me-1 text-secondary"></i> <strong>Organizan:</strong> Comité de
                     Seguridad · Asamblea Barrial · Comité Pro-Mejoras.
                 </div>
             </div>
@@ -158,15 +201,9 @@
                     {% csrf_token %}
 
                     <div class="row g-3">
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">Nombre Completo <span class="text-danger">*</span></label>
                             {{ form.nombre_comprador }}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Cédula / Identificación <span
-                                    class="text-danger">*</span></label>
-                            {{ form.cedula }}
                         </div>
 
                         <div class="col-md-6">

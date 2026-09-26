@@ -173,14 +173,23 @@ def solicitud_digital(request):
 def solicitud_confirmacion(request, pk):
     """Pantalla de confirmación tras registrar solicitud digital"""
     solicitud = get_object_or_404(SolicitudBoleto, pk=pk)
-    return render(request, 'feria/solicitud_confirmacion.html', {'solicitud': solicitud})
+    wa_consulta_link = solicitud.get_whatsapp_consulta_link(request)
+    return render(request, 'feria/solicitud_confirmacion.html', {
+        'solicitud': solicitud,
+        'wa_consulta_link': wa_consulta_link
+    })
 
 
 def solicitud_detalle_publico(request, pk):
     """Ver estado público de la solicitud y descargar boletos si fue aprobada"""
     solicitud = get_object_or_404(SolicitudBoleto, pk=pk)
     boletos = solicitud.boletos_digitales.all()
-    return render(request, 'feria/solicitud_detalle_publico.html', {'solicitud': solicitud, 'boletos': boletos})
+    wa_consulta_link = solicitud.get_whatsapp_consulta_link(request)
+    return render(request, 'feria/solicitud_detalle_publico.html', {
+        'solicitud': solicitud,
+        'boletos': boletos,
+        'wa_consulta_link': wa_consulta_link
+    })
 
 
 # ==========================================

@@ -66,7 +66,7 @@ class SolicitudBoleto(models.Model):
     ]
 
     nombre_comprador = models.CharField(max_length=150, verbose_name="Nombre Completo")
-    cedula = models.CharField(max_length=20, verbose_name="Cédula / Identificación")
+    cedula = models.CharField(max_length=20, verbose_name="Cédula / Identificación", blank=True, default='')
     telefono = models.CharField(max_length=50, verbose_name="Teléfono WhatsApp")
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
     cantidad = models.PositiveIntegerField(default=1, verbose_name="Cantidad de Boletos")
@@ -112,6 +112,30 @@ class SolicitudBoleto(models.Model):
             f"📲 *Accede a tus boletos digitales con Código QR aquí:*\n"
             f"{url_detalle}\n\n"
             f"¡Presenta el código QR en la entrada el día de la feria! 🎪"
+        )
+
+        return f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(mensaje)}"
+
+    def get_whatsapp_consulta_link(self, request=None):
+        import urllib.parse
+        phone_digits = ''.join(filter(str.isdigit, self.telefono))
+        if phone_digits.startswith('0'):
+            phone_digits = '593' + phone_digits[1:]
+        elif not phone_digits.startswith('593') and len(phone_digits) == 9:
+            phone_digits = '593' + phone_digits
+
+        if request:
+            url_detalle = request.build_absolute_uri(f"/preventa/{self.pk}/detalle/")
+        else:
+            url_detalle = f"/preventa/{self.pk}/detalle/"
+
+        mensaje = (
+            f"🎟️ *Mi Solicitud de Boleto Digital - Feria de Seguridad 2026*\n\n"
+            f"Hola {self.nombre_comprador}, este es tu enlace personal para consultar el estado de tu solicitud y ver tus boletos con código QR:\n\n"
+            f"📲 *Consulta el estado de tu boleto aquí:*\n"
+            f"{url_detalle}\n\n"
+            f"📌 *Detalle:* Solicitud #{self.id} | {self.cantidad} boleto(s) | Total: ${self.total} USD\n\n"
+            f"¡Guarda este mensaje en tu WhatsApp para no perder tu boleto! 🎪"
         )
 
         return f"https://api.whatsapp.com/send?phone={phone_digits}&text={urllib.parse.quote(mensaje)}"

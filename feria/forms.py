@@ -20,10 +20,9 @@ class AporteForm(forms.ModelForm):
 class SolicitudBoletoForm(forms.ModelForm):
     class Meta:
         model = SolicitudBoleto
-        fields = ['nombre_comprador', 'cedula', 'telefono', 'email', 'cantidad', 'numero_comprobante', 'comprobante']
+        fields = ['nombre_comprador', 'telefono', 'email', 'cantidad', 'numero_comprobante', 'comprobante']
         widgets = {
             'nombre_comprador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Juan Pérez'}),
-            'cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1712345678'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0991234567'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'correo@ejemplo.com (opcional)'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 50, 'value': 1, 'id': 'id_cantidad'}),

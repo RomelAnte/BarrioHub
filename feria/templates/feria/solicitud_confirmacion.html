@@ -29,8 +29,26 @@
             </div>
         </div>
 
-        <div class="alert alert-info py-2 small text-start mb-4">
-            <i class="bi bi-clock-history me-1"></i> El comité verificará tu transferencia a la brevedad. Guarda tu enlace de consulta para revisar la aprobación y obtener tus boletos con QR.
+        <div class="card p-3.5 mb-4 border-0 text-start shadow-sm" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 16px;">
+            <div class="d-flex align-items-start gap-3">
+                <div class="bg-success text-white p-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; flex-shrink: 0;">
+                    <i class="bi bi-whatsapp fs-4"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong class="d-block text-dark fs-6 mb-1">📱 ¡Guarda tu enlace en WhatsApp para no perderlo!</strong>
+                    <p class="text-secondary small mb-3">
+                        Al salir de esta página puedes perder el enlace. Haz clic abajo para enviártelo a tu propio chat de WhatsApp y consultarlo cuando desees.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ wa_consulta_link }}" target="_blank" class="btn btn-success fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-whatsapp"></i> Guardar Enlace en mi WhatsApp
+                        </a>
+                        <button type="button" onclick="copiarEnlace()" class="btn btn-outline-dark fw-bold px-3 py-2 rounded-3">
+                            <i class="bi bi-clipboard me-1"></i> Copiar Enlace
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
@@ -43,4 +61,14 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    function copiarEnlace() {
+        const url = window.location.origin + "{% url 'solicitud_detalle_publico' solicitud.pk %}";
+        navigator.clipboard.writeText(url);
+        alert("¡Enlace copiado al portapapeles!\nPuedes pegarlo en tus notas o chat para no perderlo.");
+    }
+</script>
+{% endblock %}
 {% endblock %}
